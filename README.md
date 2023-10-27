@@ -66,9 +66,9 @@ Welcome to the Data Analysis and Machine Learning Toolkit! This program is desig
 
 ## Contributors
 
-- Ramazan Abylkassov, MD -
-- LinkedIn: www.linkedin.com/in/ramazan-abylkassov-23965097
-- email: ramazan.abylkassov@gmail.com
+**Ramazan Abylkassov, MD**
+  - LinkedIn: www.linkedin.com/in/ramazan-abylkassov-23965097
+  - email: ramazan.abylkassov@gmail.com
 
 ## Support
 
