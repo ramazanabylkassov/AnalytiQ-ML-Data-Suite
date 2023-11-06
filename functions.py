@@ -12,7 +12,7 @@ from scipy.stats import uniform
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from pandas_profiling import ProfileReport
+# from pandas_profiling import ProfileReport
 import seaborn as sns
 import matplotlib.pyplot as plt
 import statistics
@@ -910,40 +910,40 @@ def group_by(df):
         result_df = df.groupby(group_by_column).median()
     return result_df
 
-def panda_profile_sidebar():
-    st.markdown(f"<h3 style='text-align: center'>Analyze your data with Pandas Profiling</h3>", unsafe_allow_html=True)
-    st.write('###')
+# def panda_profile_sidebar():
+#     st.markdown(f"<h3 style='text-align: center'>Analyze your data with Pandas Profiling</h3>", unsafe_allow_html=True)
+#     st.write('###')
 
-    panda_profile_settings = {
-        'title': 'DataFrame Profiling',
-    }
-    col1, col2 = st.columns(2)
-    samples = col1.checkbox('Samples')
-    correlations = col2.checkbox('Correlations')
-    col1, col2 = st.columns(2)
-    missing_diagrams = col1.checkbox('Missing diagrams')
-    duplicates = col2.checkbox('Duplicates')
-    col1, _ = st.columns(2)
-    interactions = col1.checkbox('Interactions')
-    if not samples:
-        panda_profile_settings['samples'] = None
-    if not correlations:
-        panda_profile_settings['correlations'] = None
-    if not missing_diagrams:
-        panda_profile_settings['missing_diagrams'] = None
-    if not duplicates:
-        panda_profile_settings['duplicates'] = None
-    if not interactions:
-        panda_profile_settings['interactions'] = None    
+#     panda_profile_settings = {
+#         'title': 'DataFrame Profiling',
+#     }
+#     col1, col2 = st.columns(2)
+#     samples = col1.checkbox('Samples')
+#     correlations = col2.checkbox('Correlations')
+#     col1, col2 = st.columns(2)
+#     missing_diagrams = col1.checkbox('Missing diagrams')
+#     duplicates = col2.checkbox('Duplicates')
+#     col1, _ = st.columns(2)
+#     interactions = col1.checkbox('Interactions')
+#     if not samples:
+#         panda_profile_settings['samples'] = None
+#     if not correlations:
+#         panda_profile_settings['correlations'] = None
+#     if not missing_diagrams:
+#         panda_profile_settings['missing_diagrams'] = None
+#     if not duplicates:
+#         panda_profile_settings['duplicates'] = None
+#     if not interactions:
+#         panda_profile_settings['interactions'] = None    
 
-    st.write('---')
+#     st.write('---')
 
-    return panda_profile_settings
+#     return panda_profile_settings
 
-def panda_profile_main_page(df=None, settings=None):
-    with st.expander('Panda Profile Report', expanded=True):
-        profile = ProfileReport(df, **settings)
-        st_profile_report(profile)
+# def panda_profile_main_page(df=None, settings=None):
+#     with st.expander('Panda Profile Report', expanded=True):
+#         profile = ProfileReport(df, **settings)
+#         st_profile_report(profile)
 
 def outliers_analysis_sidebar(df_analyze=None):
     df_outliers = df_analyze.select_dtypes(include='number')
