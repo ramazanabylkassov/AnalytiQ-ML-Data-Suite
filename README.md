@@ -40,6 +40,7 @@ Welcome to the Data Analysis and Machine Learning Toolkit! This program is desig
 1. **Installation:**
    - Clone this repository or download the toolkit.
    - Install the required dependencies using `pip install -r requirements.txt`.
+   - Run `streamlit run _1_Homepage.py`
 
 2. **Data Preparation:**
    - Load your dataset (in CSV format).
