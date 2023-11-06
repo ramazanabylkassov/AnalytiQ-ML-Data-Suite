@@ -3,7 +3,7 @@ import sys
 import plotly.express as px
 
 sys.path.append("..")
-from functions import change_page_buttons, choose_dataframe, features_to_analyze, data_manipulation, panda_profile_sidebar, outliers_analysis_sidebar, dataframe_exploration, panda_profile_main_page, outliers_analysis_main_page, data_animation_random, plot_pairplot
+from functions import change_page_buttons, choose_dataframe, features_to_analyze, data_manipulation, outliers_analysis_sidebar, dataframe_exploration, outliers_analysis_main_page, data_animation_random, plot_pairplot
 
 try:
     st.set_page_config(layout="wide", page_title='Data understanding', page_icon='💡')
@@ -60,12 +60,13 @@ def main():
                 z_feature = cols[0].selectbox(label='z', options=df_analyze.columns)
                 color_feature = cols[1].selectbox(label='color feature', options=df_analyze.columns)
 
-            panda_profile_toggle = st.toggle(label="Analyze with Pandas Profile")
+            # panda_profile_toggle = st.toggle(label="Analyze with Pandas Profile")
             outlier_analysis_toggle = st.toggle(label="Analyze the data outliers")
-            if panda_profile_toggle or outlier_analysis_toggle:
+            # if panda_profile_toggle or outlier_analysis_toggle:
+            if outlier_analysis_toggle:
                 with st.form('data analysis sidebar'):
-                    if panda_profile_toggle:
-                        panda_profile_settings = panda_profile_sidebar()
+                    # if panda_profile_toggle:
+                    #     panda_profile_settings = panda_profile_sidebar()
                     if outlier_analysis_toggle:
                         df_outliers, outliers_analysis_settings = outliers_analysis_sidebar(df_analyze=df_analyze)
                     data_analysis_form_button = st.form_submit_button('Visualize', use_container_width=True)
