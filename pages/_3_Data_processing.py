@@ -12,12 +12,15 @@ if 'data_process' not in st.session_state:
         'data_processed': False,
         'processed_df': None,
     }
-if 'target_log' not in st.session_state:
-    st.session_state.target_log = False
+if 'data_processing_performed' not in st.session_state:
+    st.session_state.data_processing_performed = {
+        'target_log': False,
+        'numeric_scale': False,
+        'fitted_scaler': None,
+    }
 
 def main():
     if 'homepage_param' in st.session_state and st.session_state.homepage_param['file_uploaded']:
-        st.session_state.regress_form_button = False
         df_original = st.session_state.dataframe['pre-processed'].copy()
         st.markdown(f"<h1 style='text-align: center'>{st.session_state.dataframe['df_name'].title()}</h1>", unsafe_allow_html=True)
         st.write('---')
@@ -40,6 +43,7 @@ def main():
                                       [Learn more >](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html)
                                       ''')  
             if numeric_scale:
+                st.session_state.data_processing_performed['numeric_scale'] = True
                 process_data_tuple.append(('Numeric features scaling', Numeric_scale(container=container))) 
 
             if st.session_state.homepage_param['target_feature_type'] == 'Numeric':
@@ -48,7 +52,7 @@ def main():
                                         [Learn more >](https://scikit-learn.org/stable/auto_examples/compose/plot_transformed_target.html)
                                         ''')  
                 if target_norm:
-                    st.session_state.target_log = True
+                    st.session_state.data_processing_performed['target_log'] = True
                     process_data_tuple.append(('Target feature logarithm', Target_log(container=container)))
 
             if process_data_tuple:

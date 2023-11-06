@@ -1,6 +1,6 @@
 import streamlit as st
 st.set_page_config(layout="wide", page_title='Homepage', page_icon='🏠')
-from functions import *
+from functions import change_page_buttons, reupload_file_button, preprocess_dataframe, feature_type, dataframe_exploration, upload_data, readme
 
 if 'dataframe' not in st.session_state:
     st.session_state.dataframe = {

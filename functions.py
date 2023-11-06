@@ -39,6 +39,7 @@ from sklearn.tree import export_graphviz
 import requests
 from streamlit_lottie import st_lottie
 import random
+import plotly.express as px
 
 # import sketch
 
@@ -358,61 +359,48 @@ class FeatureOneHotEncoder(BaseEstimator, TransformerMixin):
         return df
     
 def feature_type(dataframe=None, container=None):
-    dataframe_type = st.sidebar.radio('Choose the type of dataframe', ['with supervisor (target feature)', 'withOUT supervisor'], horizontal=True)
-    st.session_state.homepage_param['dataframe_type'] = dataframe_type
-    if dataframe_type == 'with supervisor (target feature)':
-        feature_types = ['Numeric', 'Categorical']
-        st.subheader('Target feature')
-        col1, col2 = st.columns((2, 1))
-        target_feature = col1.selectbox('Target feature:', dataframe.columns, label_visibility='collapsed')
-        target_type = col2.radio('Target feature type', feature_types, label_visibility='collapsed')
-        st.session_state.homepage_param['target_feature'] = target_feature
-        st.session_state.homepage_param['target_feature_type'] = target_type
-    else:
-        st.session_state.homepage_param['target_feature'] = None
-        st.session_state.homepage_param['target_feature_type'] = None
+    feature_types = ['Numeric', 'Categorical']
+    st.subheader('Target feature')
+    col1, col2 = st.columns((2, 1))
+    target_feature = col1.selectbox('Target feature:', dataframe.columns, label_visibility='collapsed')
+    target_type = col2.radio('Target feature type', feature_types, label_visibility='collapsed')
+    st.session_state.homepage_param['target_feature'] = target_feature
+    st.session_state.homepage_param['target_feature_type'] = target_type
 
     feature_types = ['Numeric', 'Categorical']
     target_feature = st.session_state.homepage_param['target_feature']
-    st.subheader('Remaining features' if dataframe_type == 'with supervisor (target feature)' else 'Features')
+    st.subheader('Remaining features')
     choose_feature = st.radio('Choose features: ', feature_types, horizontal=True, help='Not chosen features will be allocated to the opposite type')
     with st.form(key='remaining_feature_type'):
         col1, col2 = st.columns((3,1))
         if choose_feature == 'Numeric':
-            default_features = [item for item in (dataframe.drop(target_feature, axis=1).columns if dataframe_type == 'with supervisor (target feature)' else dataframe.columns) if dataframe[item].nunique() > 10]
+            default_features = [item for item in dataframe.drop(target_feature, axis=1).columns if dataframe[item].nunique() > 10]
         else:
-            default_features = [item for item in (dataframe.drop(target_feature, axis=1).columns if dataframe_type == 'with supervisor (target feature)' else dataframe.columns) if dataframe[item].nunique() < 10]
-        chosen_features = col1.multiselect(f'Choose {choose_feature.lower()} features', dataframe.drop(target_feature, axis=1).columns if dataframe_type == 'with supervisor (target feature)' else dataframe.columns, label_visibility='collapsed', default=default_features)
+            default_features = [item for item in dataframe.drop(target_feature, axis=1).columns if dataframe[item].nunique() < 10]
+        chosen_features = col1.multiselect(f'Choose {choose_feature.lower()} features', dataframe.drop(target_feature, axis=1).columns, default=default_features)
         form_button_remaining_feature_type = col2.form_submit_button('Submit')
     if form_button_remaining_feature_type or st.session_state.homepage_param['form_button_remain_feature_type']:
         st.session_state.homepage_param['form_button_remain_feature_type'] = True
         if choose_feature == 'Numeric':
             numeric_features = chosen_features
-            categorical_features = dataframe.drop(target_feature, axis=1).drop(chosen_features, axis=1).columns.tolist() if dataframe_type == 'with supervisor (target feature)' else dataframe.drop(chosen_features, axis=1).columns.tolist()
+            categorical_features = dataframe.drop(target_feature, axis=1).drop(chosen_features, axis=1).columns.tolist()
             st.session_state.homepage_param['numeric_features'] = numeric_features
             st.session_state.homepage_param['categorical_features'] = categorical_features
         else:
             categorical_features = chosen_features
-            numeric_features = dataframe.drop(target_feature, axis=1).drop(chosen_features, axis=1).columns.tolist() if dataframe_type == 'with supervisor (target feature)' else dataframe.drop(chosen_features, axis=1).columns.tolist()
+            numeric_features = dataframe.drop(target_feature, axis=1).drop(chosen_features, axis=1).columns.tolist()
             st.session_state.homepage_param['numeric_features'] = numeric_features
             st.session_state.homepage_param['categorical_features'] = categorical_features
         
         numeric_features_string = ', '.join(st.session_state.homepage_param['numeric_features'])
         categorical_features_string = ', '.join(st.session_state.homepage_param['categorical_features'])
-        if dataframe_type == 'with supervisor (target feature)':
-            container.success(f'''
-            **Feature type distribution:** \n 
-            **Target feature:** {st.session_state.homepage_param['target_feature']}  
-            **Target feature type:** {st.session_state.homepage_param['target_feature_type']}  
-            **Numeric features:** {numeric_features_string if numeric_features_string else 'No features'}  
-            **Categorical features:** {categorical_features_string if categorical_features_string else 'No features'}
-            ''', icon='✅')
-        else:
-            container.success(f'''
-            Feature type distribution: \n
-            **Numeric features:** {numeric_features_string if numeric_features_string else 'No features'} \n
-            **Categorical features:** {categorical_features_string if categorical_features_string else 'No features'}
-            ''', icon='✅')
+        container.success(f'''
+        **Feature type distribution:** \n 
+        **Target feature:** {st.session_state.homepage_param['target_feature']}  
+        **Target feature type:** {st.session_state.homepage_param['target_feature_type']}  
+        **Numeric features:** {numeric_features_string if numeric_features_string else 'No features'}  
+        **Categorical features:** {categorical_features_string if categorical_features_string else 'No features'}
+        ''', icon='✅')
 
         st.session_state.homepage_param['remaining_features_choice'] = choose_feature
         st.session_state.homepage_param['chosen_features_type'] = chosen_features
@@ -650,21 +638,17 @@ def simple_graph(df):
             feature_types = ['numeric' if (simple_graph_feature_1 in st.session_state.homepage_param['numeric_features'] or (simple_graph_feature_1 == target_feature and target_feature_type == 'Numeric')) else 'categorical', 'numeric' if simple_graph_feature_2 in st.session_state.homepage_param['numeric_features'] or (simple_graph_feature_2 == target_feature and target_feature_type == 'Numeric')  else 'categorical']
         else:
             feature_types = ['categorical', 'categorical']
-        if feature_types.count('numeric') == 0:
-            fig = plt.figure()
-            sns.histplot(x=simple_graph_feature_1, hue=simple_graph_feature_2, data=df, stat="count", multiple="stack")
-            plt.xticks(rotation=90, ha='right')
-            st.pyplot(fig)
+        if feature_types.count('numeric') == 0:            
+            fig = px.histogram(df, x=simple_graph_feature_1, color=simple_graph_feature_2)
+            st.plotly_chart(fig, use_container_width=True)
         elif feature_types.count('numeric') == 1:
             categorical = simple_graph_feature_2 if simple_graph_feature_2 in st.session_state.homepage_param['categorical_features'] or (simple_graph_feature_2 == target_feature and target_feature_type == 'Categorical') else simple_graph_feature_1
             numerical = simple_graph_feature_1 if categorical == simple_graph_feature_2 else simple_graph_feature_2
-            fig = plt.figure()
-            sns.violinplot(x=df[categorical], y=df[numerical])
-            st.pyplot(fig)
+            fig = px.violin(df, x=df[categorical], y=df[numerical])
+            st.plotly_chart(fig, use_container_width=True)
         else:
-            fig = plt.figure()
-            sns.regplot(x=df[simple_graph_feature_2], y=df[simple_graph_feature_1], color='green')
-            st.pyplot(fig)
+            fig = px.scatter(df, x=df[simple_graph_feature_2], y=df[simple_graph_feature_1], trendline='ols')
+            st.plotly_chart(fig, use_container_width=True)
 
 class Visualization:
     def __init__(self, dataframe=None, settings=None):
@@ -1125,6 +1109,7 @@ class Numeric_scale(BaseEstimator, TransformerMixin):
         numeric_features = st.session_state.homepage_param['numeric_features']
         scaler = StandardScaler()
         scaler.fit(df_scale[numeric_features])
+        st.session_state.data_processing_performed['fitted_scaler'] = scaler
         df_scale[numeric_features] = scaler.transform(df_scale[numeric_features])
         container.success(f'Numeric features ({", ".join(numeric_features)}) are scaled', icon='✅')
         return df_scale
@@ -1323,7 +1308,7 @@ class MachineLearning:
         st.write(classification_report(y_test, pred_randtree))
 
 def regression_metrics(regression_name=None, alpha=None, y_test=None, y_pred=None):
-    if st.session_state.target_log == False:
+    if not st.session_state.data_processing_performed['target_log']:
         output = {
             'Regression model': regression_name,
             'Hyper-parameter': alpha,
@@ -1377,7 +1362,7 @@ def train_test(df=None, target_feature=None):
     return train_test_split(df.drop(target_feature,axis=1), df[target_feature], test_size=test_size, random_state=32)
 
 @st.cache_resource
-def linear_regression(train_test=None, cv_number=None, feature_importance=None):
+def linear_regression(train_test=None, cv_number=None, cv_measurement=None, feature_importance=None):
     X_train = train_test['X_train']
     X_test = train_test['X_test']
     y_train = train_test['y_train']
@@ -1398,17 +1383,17 @@ def linear_regression(train_test=None, cv_number=None, feature_importance=None):
     regression_ouput['regression_metric'] = lin_regr_metric
 
     if cv_number:
-        cv_analysis_lin = ML_analysis_cross_validation(model_name=regression_name, model=model_regression, X_train=X_train, y_train=y_train, cv_number=cv_number)
+        cv_analysis_lin = ML_analysis_cross_validation(model_name=regression_name, model=model_regression, X_train=X_train, y_train=y_train, cv_number=cv_number, cv_measurement=cv_measurement)
         regression_ouput['cv_analysis'] = cv_analysis_lin
     if feature_importance:
         FI_analysis_lin = ML_analysis_feature_importance(model_name=regression_name, model=model_regression, feature_list=X_train.columns)
         regression_ouput['FI_analysis'] = FI_analysis_lin
 
-    st.session_state.linear_regression_fit = model_regression
-    return regression_ouput, model_regression
+    st.session_state.fit_models['linear'] = [model_regression]
+    return regression_ouput
 
 @st.cache_resource
-def polynomial_regression(train_test=None, degree=None, cv_number=None, feature_importance=None, search_cv_type=None, n_iter_number=None):
+def polynomial_regression(train_test=None, degree=None, cv_number=None, cv_measurement=None, feature_importance=None, search_cv_type=None, n_iter_number=None):
     X_train = train_test['X_train']
     X_test = train_test['X_test']
     y_train = train_test['y_train']
@@ -1472,21 +1457,21 @@ def polynomial_regression(train_test=None, degree=None, cv_number=None, feature_
         degree_buffer = degree
         model_for_analysis = model_polynom
 
-    
+    st.session_state.fit_models['polynomial'] = [model_for_analysis, degree_buffer]
     pol_regr_metric = regression_metrics(regression_name=regression_name, alpha=f'degree: {degree_buffer}', y_test=y_test, y_pred=y_pred_polynom)
     regression_ouput['regression_metric'] = pol_regr_metric
 
     if cv_number:
-        cv_analysis_pol = ML_analysis_cross_validation(model_name=regression_name, model=model_for_analysis, X_train=X_train_poly, y_train=y_train, cv_number=cv_number)
+        cv_analysis_pol = ML_analysis_cross_validation(model_name=regression_name, model=model_for_analysis, X_train=X_train_poly, y_train=y_train, cv_number=cv_number, cv_measurement=cv_measurement)
         regression_ouput['cv_analysis'] = cv_analysis_pol
     if feature_importance:
         FI_analysis_pol = ML_analysis_feature_importance(model_name=regression_name, model=model_for_analysis, feature_list=feature_names)
         regression_ouput['FI_analysis'] = FI_analysis_pol
 
-    return regression_ouput, model_for_analysis
+    return regression_ouput
 
 @st.cache_resource
-def lasso_regression(train_test=None, alpha=None, cv_number=None, feature_importance=None, search_cv_type=None, n_iter_number=None):
+def lasso_regression(train_test=None, alpha=None, cv_number=None, cv_measurement=None, feature_importance=None, search_cv_type=None, n_iter_number=None):
     X_train = train_test['X_train']
     X_test = train_test['X_test']
     y_train = train_test['y_train']
@@ -1525,21 +1510,22 @@ def lasso_regression(train_test=None, alpha=None, cv_number=None, feature_import
         alpha_buffer = alpha
         model_for_analysis = model_lasso
     
+    st.session_state.fit_models['lasso'] = [model_for_analysis]
     lass_regr_metric = regression_metrics(regression_name=regression_name, alpha=f'alpha: {alpha_buffer}', y_test=y_test, y_pred=y_pred_lasso)
     regression_ouput['regression_metric'] = lass_regr_metric
 
     if cv_number:
-        cv_analysis_lasso = ML_analysis_cross_validation(model_name=regression_name, model=model_for_analysis, X_train=X_train, y_train=y_train, cv_number=cv_number)
+        cv_analysis_lasso = ML_analysis_cross_validation(model_name=regression_name, model=model_for_analysis, X_train=X_train, y_train=y_train, cv_number=cv_number, cv_measurement=cv_measurement)
         regression_ouput['cv_analysis'] = cv_analysis_lasso
 
     if feature_importance:
         FI_analysis_lasso = ML_analysis_feature_importance(model_name=regression_name, model=model_for_analysis, feature_list=X_train.columns)
         regression_ouput['FI_analysis'] = FI_analysis_lasso
 
-    return regression_ouput, model_for_analysis
+    return regression_ouput
 
 @st.cache_resource
-def ridge_regression(train_test=None, alpha=None, cv_number=None, feature_importance=None, search_cv_type=None, n_iter_number=None):
+def ridge_regression(train_test=None, alpha=None, cv_number=None, cv_measurement=None, feature_importance=None, search_cv_type=None, n_iter_number=None):
     X_train = train_test['X_train']
     X_test = train_test['X_test']
     y_train = train_test['y_train']
@@ -1578,18 +1564,19 @@ def ridge_regression(train_test=None, alpha=None, cv_number=None, feature_import
         alpha_buffer = alpha
         model_for_analysis = model_ridge
     
+    st.session_state.fit_models['ridge'] = [model_for_analysis]
     ridge_regr_metric = regression_metrics(regression_name=regression_name, alpha=f'alpha: {alpha_buffer}', y_test=y_test, y_pred=y_pred_ridge)
     regression_ouput['regression_metric'] = ridge_regr_metric
 
     if cv_number:
-        cv_analysis_ridge = ML_analysis_cross_validation(model_name=regression_name, model=model_for_analysis, X_train=X_train, y_train=y_train, cv_number=cv_number)
+        cv_analysis_ridge = ML_analysis_cross_validation(model_name=regression_name, model=model_for_analysis, X_train=X_train, y_train=y_train, cv_number=cv_number, cv_measurement=cv_measurement)
         regression_ouput['cv_analysis'] = cv_analysis_ridge
 
     if feature_importance:
         FI_analysis_ridge = ML_analysis_feature_importance(model_name=regression_name, model=model_for_analysis, feature_list=X_train.columns)
         regression_ouput['FI_analysis'] = FI_analysis_ridge
 
-    return regression_ouput, model_for_analysis
+    return regression_ouput
 
 def ML_analysis_feature_importance(model_name=None, model=None, feature_list=None):     
     FI_output = {
@@ -1609,17 +1596,20 @@ def ML_analysis_feature_importance(model_name=None, model=None, feature_list=Non
     
     return FI_output
 
-def ML_analysis_cross_validation(model_name=None, model=None, X_train=None, y_train=None, cv_number=None):
-    if st.session_state.target_log:
-        scores = -cross_val_score(model, X_train, np.exp(y_train), scoring='neg_mean_absolute_error',  cv=cv_number)
+def ML_analysis_cross_validation(model_name=None, model=None, X_train=None, y_train=None, cv_number=None, cv_measurement=None):
+    if  st.session_state.data_processing_performed['target_log']:
+        scores = cross_val_score(model, X_train, np.exp(y_train), cv=cv_number, scoring=cv_measurement if cv_measurement != 'accuracy' else None)
     else:
-        scores = -cross_val_score(model, X_train, y_train, scoring='neg_mean_absolute_error',  cv=cv_number)
+        scores = cross_val_score(model, X_train, y_train, cv=cv_number, scoring=cv_measurement if cv_measurement != 'accuracy' else None)
     
+    if cv_measurement == 'neg_mean_absolute_error':
+        scores = -scores
+
     CV_output = {}
     CV_output['Regression model'] = model_name
-    CV_output['Mean MAE'] = round(scores.mean(), 4)
+    CV_output[f'Mean {cv_measurement}'] = round(scores.mean()*100 if cv_measurement=='accuracy' else scores.mean(), 2)
     for i, score in enumerate(scores):
-        CV_output[f'MAE of CV sample #{i+1}'] = round(score, 4)
+        CV_output[f'{cv_measurement} of CV sample #{i+1}'] = round(score*100 if cv_measurement=='accuracy' else score, 2)
     
     return CV_output
 
@@ -1646,8 +1636,7 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
                                          **Purpose:** Feature importance helps identify which features have the most impact on the model's performance, allowing you to focus on the most influential variables and potentially simplify the model by removing less important ones. \n
                                          [Learn more >](https://inria.github.io/scikit-learn-mooc/python_scripts/dev_features_importance.html#randomforest-feature-importances)                                         
                                          ''')
-        cols = st.columns((2))
-        CV_checkbox = cols[0].checkbox(label='Cross-Validation (CV) analysis', help=f'''
+        CV_checkbox = st.checkbox(label='Cross-Validation (CV) analysis', help=f'''
                                        **Cross-validation:** \n
                                        **Definition:** Cross-validation is a statistical technique in machine learning and data analysis where a dataset is partitioned into subsets for the purpose of evaluating the performance of a predictive model.  
                                        **Purpose:** The primary purpose of cross-validation is twofold:  
@@ -1656,7 +1645,14 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
                                        [Learn more >](https://scikit-learn.org/0.17/modules/cross_validation.html)
                                        ''')
         if CV_checkbox:
-            CV_samples = cols[1].number_input('Amount of CV samples', value=5, step=1)
+            cols = st.columns(2)
+            CV_samples = cols[0].number_input('Amount of CV samples', value=5, step=1)
+            if st.session_state.homepage_param['target_feature_type'] == 'Numeric':
+                cv_measurement_list = ['neg_mean_absolute_error', 'r2']
+            else:
+                cv_measurement_list = ['accuracy', 'f1']
+            CV_measurement = cols[1].selectbox('Select the measurement of CV', cv_measurement_list)
+
 
     st.write('###')
     with st.form('Regression models'):
@@ -1709,28 +1705,28 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
         regression_FI_analysis = []
 
         if linear_regress_toggle:
-            lin_regr_output, _ = linear_regression(train_test=train_test_data, cv_number=CV_samples, feature_importance=feature_importance)
+            lin_regr_output = linear_regression(train_test=train_test_data, cv_number=CV_samples, cv_measurement=CV_measurement, feature_importance=feature_importance)
             regression_metrics.append(lin_regr_output['regression_metric'])
             if lin_regr_output['cv_analysis'] != None:
                 regression_cv_analysis.append(lin_regr_output['cv_analysis'])
             if lin_regr_output['FI_analysis'] != None:
                 regression_FI_analysis.append(lin_regr_output['FI_analysis'])
         if polynomial_regress_toggle:
-            pol_regr_output, _ = polynomial_regression(train_test=train_test_data, degree=pol_regr_degree, cv_number=CV_samples, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
+            pol_regr_output = polynomial_regression(train_test=train_test_data, degree=pol_regr_degree, cv_number=CV_samples, cv_measurement=CV_measurement, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
             regression_metrics.append(pol_regr_output['regression_metric'])
             if pol_regr_output['cv_analysis'] != None:
                 regression_cv_analysis.append(pol_regr_output['cv_analysis'])
             if pol_regr_output['FI_analysis'] != None:
                 regression_FI_analysis.append(pol_regr_output['FI_analysis'])
         if lasso_regress_toggle:
-            lass_regr_output, _ = lasso_regression(train_test=train_test_data, alpha=lasso_regr_alpha, cv_number=CV_samples, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
+            lass_regr_output = lasso_regression(train_test=train_test_data, alpha=lasso_regr_alpha, cv_number=CV_samples, cv_measurement=CV_measurement, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
             regression_metrics.append(lass_regr_output['regression_metric'])
             if lass_regr_output['cv_analysis'] != None:
                 regression_cv_analysis.append(lass_regr_output['cv_analysis'])
             if lass_regr_output['FI_analysis'] != None:
                 regression_FI_analysis.append(lass_regr_output['FI_analysis'])
         if ridge_regress_toggle:
-            ridge_regr_output, _ = ridge_regression(train_test=train_test_data, alpha=ridge_regr_alpha, cv_number=CV_samples, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
+            ridge_regr_output = ridge_regression(train_test=train_test_data, alpha=ridge_regr_alpha, cv_number=CV_samples, cv_measurement=CV_measurement, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
             regression_metrics.append(ridge_regr_output['regression_metric'])
             if ridge_regr_output['cv_analysis'] != None:
                 regression_cv_analysis.append(ridge_regr_output['cv_analysis'])
@@ -1829,13 +1825,18 @@ def readme():
                 - Fine-tune model hyperparameters.
                 - Evaluate model performance using various metrics.
 
-                ## Contributors
+                ## Kaggle examples
+                - Numeric target feature: [Price of flats in Moscow Dataset](https://www.kaggle.com/datasets/hugoncosta/price-of-flats-in-moscow/data)
+                - Categorical target feature: [Titanic dataset](https://www.kaggle.com/competitions/titanic)
 
-                - Ramazan Abylkassov, MD
+                ## Contributors
+                **Ramazan Abylkassov, MD**
+                - [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/)
+                - [GitHub repository](https://github.com/ramazanabylkassov/Data-Analysis-and-Machine-Learning-Toolkit)
 
                 ## Support
 
-                If you have any questions, encounter issues, or want to contribute to the toolkit, please contact - [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/).
+                If you have any questions, encounter issues, or want to contribute to the toolkit, please contact - ramazan.abylkassov@gmail.com
 
                 Happy data analysis and machine learning!
              ''')

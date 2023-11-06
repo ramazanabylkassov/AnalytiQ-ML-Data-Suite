@@ -1,8 +1,9 @@
 import streamlit as st
 import sys
+import plotly.express as px
 
 sys.path.append("..")
-from functions import *
+from functions import change_page_buttons, choose_dataframe, features_to_analyze, data_manipulation, panda_profile_sidebar, outliers_analysis_sidebar, dataframe_exploration, panda_profile_main_page, outliers_analysis_main_page, data_animation_random, plot_pairplot
 
 try:
     st.set_page_config(layout="wide", page_title='Data understanding', page_icon='💡')
@@ -50,6 +51,15 @@ def main():
             pairplot_toggle = cols_pp[0].toggle(label='Pairplot the features')
             container_pairplot_warning = st.container()
 
+            scatter_3d_toggle = st.toggle(label='3D scatter plot')
+            if scatter_3d_toggle:
+                cols = st.columns(2)
+                x_feature = cols[0].selectbox(label='x', options=df_analyze.columns)
+                y_feature = cols[1].selectbox(label='y', options=df_analyze.columns)
+                cols = st.columns(2)
+                z_feature = cols[0].selectbox(label='z', options=df_analyze.columns)
+                color_feature = cols[1].selectbox(label='color feature', options=df_analyze.columns)
+
             panda_profile_toggle = st.toggle(label="Analyze with Pandas Profile")
             outlier_analysis_toggle = st.toggle(label="Analyze the data outliers")
             if panda_profile_toggle or outlier_analysis_toggle:
@@ -72,8 +82,7 @@ def main():
                 st.write(f"<h3 style='text-align: center'>Pairplot analysis</h3>", unsafe_allow_html=True)
                 hue=None
                 hue_cat_list = [item for item in df_analyze.columns if item in st.session_state.homepage_param['categorical_features']]
-                if cols_pp[1].checkbox('Choose feature to highlight (hue)'):
-                    hue = cols_pp[1].selectbox('Choose hue feature', hue_cat_list, label_visibility='collapsed')
+                hue = cols_pp[1].selectbox('Choose feature to highlight (hue)', hue_cat_list, index=None)
                 plot_pairplot(df=df_analyze, hue=hue)
 
         if (panda_profile_toggle or outlier_analysis_toggle) and data_analysis_form_button:
@@ -81,6 +90,10 @@ def main():
                 panda_profile_main_page(df=df_analyze, settings=panda_profile_settings)
             if outlier_analysis_toggle:
                 outliers_analysis_main_page(df=df_outliers, settings=outliers_analysis_settings, dataframe_name=dataframe_name)
+
+        if scatter_3d_toggle:
+            fig = px.scatter_3d(df_analyze, x=x_feature, y=y_feature, z=z_feature, color=color_feature)
+            st.plotly_chart(fig, use_container_width=True)
 
     else:
         st.write(f"<h2 style='text-align: center'>Upload file at the Homepage</h2>", unsafe_allow_html=True)

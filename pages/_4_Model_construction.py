@@ -6,8 +6,8 @@ import sys
 sys.path.append("..")
 from functions import *
 
-if 'linear_regression_fit' not in st.session_state:
-    st.session_state.linear_regression_fit = None
+if 'fit_models' not in st.session_state:
+    st.session_state.fit_models = {}
 
 def main():
     if 'homepage_param' in st.session_state and st.session_state.homepage_param['file_uploaded']:
@@ -27,26 +27,24 @@ def main():
         with st.sidebar:
             change_page_buttons(key='top', pages=['3 Data processing', '5 Model deployment'])
             st.write(f"<h1 style='text-align: center'>Control panel</h1>", unsafe_allow_html=True)
-            if st.session_state.homepage_param['dataframe_type'] == 'with supervisor (target feature)':
-                st.markdown(f"<h2 style='text-align: center'>Supervised Machine Learning</h2>", unsafe_allow_html=True)
-                st.write('---')
-                st.markdown(f"<h2 style='text-align: center'>Determine train/test ratio</h2>", unsafe_allow_html=True)
-                train_test_data = {}
-                train_test_data['X_train'], train_test_data['X_test'], train_test_data['y_train'], train_test_data['y_test'] = train_test(df=processed_df, target_feature=target_feature)
-                st.write('---')
+            st.markdown(f"<h2 style='text-align: center'>Supervised Machine Learning</h2>", unsafe_allow_html=True)
+            st.write('---')
+            st.markdown(f"<h2 style='text-align: center'>Determine train/test ratio</h2>", unsafe_allow_html=True)
+            train_test_data = {}
+            train_test_data['X_train'], train_test_data['X_test'], train_test_data['y_train'], train_test_data['y_test'] = train_test(df=processed_df, target_feature=target_feature)
+            st.write('---')
 
-                if st.session_state.homepage_param['target_feature_type'] == 'Numeric':
-                    ML_regression_models(train_test_data=train_test_data, container_metrics=container_metrics, container_cv_analysis=container_cv_analysis, container_FI_analysis=container_FI_analysis)
-                else:
-                    KNN_switch = st.toggle(label="K-NN classification")
-                    SVC_switch = st.toggle(label="SVC classification")
-                    logistic_regr_switch = st.toggle(label="Logistic regression")
-                    decision_tree_switch = st.toggle(label="Decision Tree Classifier")
-                    random_forest_switch = st.toggle(label="Random Tree Classifier")
+            if st.session_state.homepage_param['target_feature_type'] == 'Numeric':
+                ML_regression_models(train_test_data=train_test_data, container_metrics=container_metrics, container_cv_analysis=container_cv_analysis, container_FI_analysis=container_FI_analysis)
             else:
-                st.markdown(f"<h2 style='text-align: center'>To be continued...</h2>", unsafe_allow_html=True)        
-
+                KNN_switch = st.toggle(label="K-NN classification")
+                SVC_switch = st.toggle(label="SVC classification")
+                logistic_regr_switch = st.toggle(label="Logistic regression")
+                decision_tree_switch = st.toggle(label="Decision Tree Classifier")
+                random_forest_switch = st.toggle(label="Random Tree Classifier")
+        
             change_page_buttons(key='bottom', pages=['3 Data processing', '5 Model deployment'])
+
     else:
         st.write(f"<h2 style='text-align: center'>Upload file at the Homepage</h2>", unsafe_allow_html=True)
         cols = st.columns(3)
