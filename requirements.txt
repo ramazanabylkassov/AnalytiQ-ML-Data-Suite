@@ -1,6 +1,7 @@
 aiohttp==3.8.6
 aiosignal==1.3.1
 altair==4.0.0
+annotated-types==0.6.0
 appnope==0.1.3
 astor==0.8.1
 asttokens==2.2.1
@@ -50,6 +51,7 @@ jupyter_core==5.3.1
 jupyterlab-widgets==3.0.8
 kiwisolver==1.4.4
 lambdaprompt==0.5.5
+llvmlite==0.41.1
 lxml==4.9.3
 Markdown==3.4.4
 markdown-it-py==3.0.0
@@ -64,6 +66,7 @@ multidict==6.0.4
 multimethod==1.9.1
 nest-asyncio==1.5.6
 networkx==3.1
+numba==0.58.1
 numpy==1.23.5
 openpyxl==3.1.2
 packaging==23.1
@@ -78,6 +81,7 @@ Pillow==9.5.0
 pipdeptree==2.13.0
 pipreqs==0.4.13
 platformdirs==3.9.1
+plotly==5.18.0
 prettytable==3.8.0
 prompt-toolkit==3.0.39
 protobuf==3.20.3
@@ -85,7 +89,8 @@ psutil==5.9.5
 ptyprocess==0.7.0
 pure-eval==0.2.2
 pyarrow==12.0.1
-pydantic==1.10.12
+pydantic==2.4.2
+pydantic_core==2.10.1
 pydeck==0.8.1b0
 pydotplus==2.0.2
 pyecharts==2.0.3
@@ -140,7 +145,7 @@ toolz==0.12.0
 tornado==6.3.2
 tqdm==4.65.0
 traitlets==5.9.0
-typeguard==2.13.3
+typeguard==4.1.5
 typing_extensions==4.7.1
 tzdata==2023.3
 tzlocal==4.3.1
@@ -153,5 +158,5 @@ widgetsnbextension==4.0.8
 wordcloud==1.9.2
 yarg==0.1.9
 yarl==1.9.2
-ydata-profiling @ https://github.com/pandas-profiling/pandas-profiling/archive/master.zip#sha256=c87a47bd9066b8616e0d22fdf81e1db715838ca9d6968fc9854207abc9ee90c0
+ydata-profiling==4.6.1
 zipp==3.16.2
