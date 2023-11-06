@@ -1,11 +1,10 @@
 import streamlit as st
-from sklearn.preprocessing import StandardScaler
 
 st.set_page_config(layout="wide", page_title='Model construction', page_icon='💻')
 
 import sys
 sys.path.append("..")
-from functions import *
+from functions import dataframe_exploration, change_page_buttons, PolynomialFeatures, st_lottie, data_animation_random, pd, np
 
 def main():
     if 'homepage_param' in st.session_state and st.session_state.homepage_param['file_uploaded']:
@@ -35,7 +34,11 @@ def main():
                     for i, feature in enumerate(group):
                         with cols[i]:
                             test_data_row[feature] = st.number_input(f'{feature}')
-                model = st.radio('Choose model to predict', list(st.session_state.fit_models.keys()), horizontal=True)
+                chosen_models_list = []
+                for model in st.session_state.fit_models:
+                    if st.session_state.fit_models[model] != None:
+                        chosen_models_list.append(model)                
+                model = st.radio('Choose model to predict', chosen_models_list, horizontal=True)
                 data_entry_form_button = st.form_submit_button(label='Submit new data')
             change_page_buttons(key='bottom', pages=['4 Model construction'])
             

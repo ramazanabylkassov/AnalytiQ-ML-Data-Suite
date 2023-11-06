@@ -5,7 +5,7 @@ st.set_page_config(layout="wide", page_title='Data processing', page_icon='âš™ï¸
 
 import sys
 sys.path.append("..")
-from functions import *
+from functions import process_outliers, Numeric_scale, Target_log, change_page_buttons, dataframe_exploration, st_lottie, data_animation_random
 
 if 'data_process' not in st.session_state:
     st.session_state.data_process = {
@@ -44,7 +44,9 @@ def main():
                                       ''')  
             if numeric_scale:
                 st.session_state.data_processing_performed['numeric_scale'] = True
-                process_data_tuple.append(('Numeric features scaling', Numeric_scale(container=container))) 
+                process_data_tuple.append(('Numeric features scaling', Numeric_scale(container=container)))
+            else:
+                st.session_state.data_processing_performed['numeric_scale'] = False
 
             if st.session_state.homepage_param['target_feature_type'] == 'Numeric':
                 target_norm = st.toggle(label="Normalize (log) target feature", help='''
@@ -54,6 +56,8 @@ def main():
                 if target_norm:
                     st.session_state.data_processing_performed['target_log'] = True
                     process_data_tuple.append(('Target feature logarithm', Target_log(container=container)))
+                else:
+                    st.session_state.data_processing_performed['target_log'] = False
 
             if process_data_tuple:
                 st.session_state.data_process['data_processed'] = True

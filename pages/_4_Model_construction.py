@@ -4,10 +4,15 @@ st.set_page_config(layout="wide", page_title='Model construction', page_icon='ðŸ
 
 import sys
 sys.path.append("..")
-from functions import *
+from functions import dataframe_exploration, change_page_buttons, train_test, ML_regression_models, st_lottie, data_animation_random
 
 if 'fit_models' not in st.session_state:
-    st.session_state.fit_models = {}
+    st.session_state.fit_models = {
+        'linear': None,
+        'polynomial': None,
+        'lasso': None,
+        'ridge': None,
+    }
 
 def main():
     if 'homepage_param' in st.session_state and st.session_state.homepage_param['file_uploaded']:
@@ -16,6 +21,9 @@ def main():
 
         st.markdown(f"<h1 style='text-align: center'>{st.session_state.dataframe['df_name'].title()}</h1>", unsafe_allow_html=True)
         st.write('---')
+
+        with st.expander('session state'):
+            st.write(st.session_state)
 
         st.markdown(f"<h1 style='text-align: center'>Model construction</h1>", unsafe_allow_html=True)
         st.write('---')

@@ -1,75 +1,48 @@
-# Data Analysis and Machine Learning Toolkit
+# About
 
-## Introduction
+<!-- [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/arturlunardi/predict_rental_prices_streamlit/main/src/app.py) -->
 
-Welcome to the Data Analysis and Machine Learning Toolkit! This program is designed to simplify the process of working with datasets that have a target feature, whether it's numeric or categorical. With this toolkit, you can perform various data pre-processing tasks, conduct data analysis with visualization, handle outlier analysis, and implement supervised machine learning models for both regression and classification tasks.
+This application provides an overview of the brazilian_houses_to_rent dataset from Kaggle. It is a dataset that provides rent prices for real estate properties in Brazil.
 
-## Features
+<!-- The app it is [deployed](https://share.streamlit.io/arturlunardi/predict_rental_prices_streamlit/main/src/app.py) in Streamlit. -->
 
-1. **Homepage - Data Pre-processing:**
-  - Select and drop unnecessary columns from the dataset.
-  - Impute missing values based on a predetermined strategy or remove rows with missing data if necessary.
-  - Apply ordinal encoding to categorical features with an inherent order.
-  - Utilize one-hot encoding for categorical features without a natural order.
-  - Identify and drop duplicate rows, if any, to ensure data integrity.
-  - Manually define the feature types, including the target variable, numerical features, and categorical features.
+<!-- The data were provided from this [source](https://www.kaggle.com/rubenssjr/brasilian-houses-to-rent).  -->
 
-2. **Data understanding - Data Analysis and Visualization:**
-  - Generate descriptive statistics for your dataset.
-  - Visualize data distributions, correlations, and more.
-  - Explore the relationship between features and the target variable.   
-  - Identify and visualize outliers.
+You can check on the sidebar of the app:
+- EDA (Exploratory Data Analysis)
+- Model Prediction
+- Model Evaluation
 
-3. **Data understanding - Outlier Analysis:**
-  - Detect and visualize outliers using various methods such as Z-score, IQR, or visualization techniques like scatter plots and box plots.
+The prediction are made regarding to the rent amount utilizing pre trained machine learning models.
 
-4. **Data Processing:**
-  - Choose to treat outliers based on your analysis.
-  - Prepare the data for machine learning models.
-  - Perform any required normalization or standardization of numerical features.
+All the operations in the dataset were already done and stored as csv files inside the data directory. If you want to check the code, go through the notebook directory in this repository.
 
-5. **Model construction - Supervised Machine Learning:**
-  - Split the dataset into training and testing subsets for further analysis and modeling.
-  - Implement regression models for numeric target features.
-  - Implement classification models for categorical target features.
-  - Fine-tune model hyperparameters.
-  - Evaluate model performance using various metrics.
+# Model Definition
 
-## Usage
+The structure of the training it is to wrap the process around a scikit-learn Pipeline. There were 4 possible combinations and 5 models, resulting in 20 trained models.
 
-1. **Installation:**
-   - Clone this repository or download the toolkit.
-   - Install the required dependencies using `pip install -r requirements.txt`.
-   - Run in terminal `streamlit run _1_Homepage.py`
+The combinations are regarding to perform Feature Creation and/or Target Transformations in the dataset.
 
-2. **Data Preparation:**
-   - Load your dataset (in CSV format).
-   - Use the provided functions for data pre-processing to clean and prepare the data.
+Models:
 
-3. **Data Analysis and Visualization:**
-   - Use the visualization functions to explore your data.
-   - Identify and visualize outliers.
+- Random Forest
+- XGB
+- Ridge
+- LGBM
+- Neural Network
 
-4. **Data Processing:**
-   - Apply feature selection, data engineering as needed.
+Our main accuracy metric is RMSE. To enhance our model definition, we utilized Cross Validation and Random Search for hyperparameter tuning.
 
-5. **Supervised Machine Learning:**
-   - Choose a regression or classification model from the toolkit.
-   - Fine-tune hyperparameters if necessary.
-   - Train and evaluate the model on your dataset.
+# Run the App
 
-6. **Results and Reporting:**
-   - Analyze the model's performance using the provided evaluation metrics.
-   - Generate visualizations and reports to communicate your findings.
+To run locally, clone the repository, go to the diretory and install the requirements.
 
-## Contributors
+```
+pip install -r requirements.txt
+```
 
-**Ramazan Abylkassov, MD**
-  - LinkedIn: www.linkedin.com/in/ramazan-abylkassov-23965097
-  - email: ramazan.abylkassov@gmail.com
+Now, go to the src directory and run:
 
-## Support
-
-If you have any questions, encounter issues, or want to contribute to the toolkit, please contact.
-
-Happy data analysis and machine learning!
+```
+streamlit run _1_Homepage.py
+```

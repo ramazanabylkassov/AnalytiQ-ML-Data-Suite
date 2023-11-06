@@ -186,9 +186,12 @@ def preprocess_dataframe(df, container):
 def change_page_buttons(key=None, pages=None):
     if len(pages) == 1:
         if st.button(f'{"Next" if pages==["2 Data understanding"] else "Return to"}: **{pages[0].split(" ", 1)[1]}**', use_container_width=True, type='primary', key=key):
-            st.session_state.homepage_param['form_button_remain_feature_type'] = False
-            st.session_state.homepage_param['re_upload_button'] = False
-            switch_page(pages[0])
+            if pages==["2 Data understanding"] and not st.session_state.homepage_param['form_button_remain_feature_type']:
+                st.warning('Feature types are not defined (Press submit button)', icon='⚠️')
+            else:
+                st.session_state.homepage_param['re_upload_button'] = False
+                st.session_state.homepage_param['form_button_remain_feature_type'] = False
+                switch_page(pages[0])
     else:
         col1, col2 = st.columns(2)
         if col1.button(f'Return to: **{pages[0].split(" ", 1)[1]}**', use_container_width=True, type='primary', key=f'{key} 1'):
@@ -910,6 +913,13 @@ def group_by(df):
         result_df = df.groupby(group_by_column).median()
     return result_df
 
+def correlation_heatmap(df=None):
+    st.markdown(f"<h3 style='text-align: center'>Correlation heatmap</h3>", unsafe_allow_html=True)
+    fig = plt.figure(figsize=(15, 5))
+    sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
+    st.pyplot(fig)
+    
+
 # def panda_profile_sidebar():
 #     st.markdown(f"<h3 style='text-align: center'>Analyze your data with Pandas Profiling</h3>", unsafe_allow_html=True)
 #     st.write('###')
@@ -1372,7 +1382,8 @@ def linear_regression(train_test=None, cv_number=None, cv_measurement=None, feat
     regression_ouput = {
         'regression_metric': None,
         'cv_analysis': None,
-        'FI_analysis': None, 
+        'FI_analysis': None,
+        'fit_model': None,
     }
 
     model_regression = LinearRegression()
@@ -1389,7 +1400,7 @@ def linear_regression(train_test=None, cv_number=None, cv_measurement=None, feat
         FI_analysis_lin = ML_analysis_feature_importance(model_name=regression_name, model=model_regression, feature_list=X_train.columns)
         regression_ouput['FI_analysis'] = FI_analysis_lin
 
-    st.session_state.fit_models['linear'] = [model_regression]
+    regression_ouput['fit_model'] = model_regression
     return regression_ouput
 
 @st.cache_resource
@@ -1404,6 +1415,7 @@ def polynomial_regression(train_test=None, degree=None, cv_number=None, cv_measu
         'regression_metric': None,
         'cv_analysis': None,
         'FI_analysis': None, 
+        'fit_model': None,
     }
 
     if search_cv_type == 'GridSearchCV':
@@ -1457,7 +1469,7 @@ def polynomial_regression(train_test=None, degree=None, cv_number=None, cv_measu
         degree_buffer = degree
         model_for_analysis = model_polynom
 
-    st.session_state.fit_models['polynomial'] = [model_for_analysis, degree_buffer]
+    regression_ouput['fit_model'] = [model_for_analysis, degree_buffer]
     pol_regr_metric = regression_metrics(regression_name=regression_name, alpha=f'degree: {degree_buffer}', y_test=y_test, y_pred=y_pred_polynom)
     regression_ouput['regression_metric'] = pol_regr_metric
 
@@ -1481,7 +1493,8 @@ def lasso_regression(train_test=None, alpha=None, cv_number=None, cv_measurement
     regression_ouput = {
         'regression_metric': None,
         'cv_analysis': None,
-        'FI_analysis': None, 
+        'FI_analysis': None,
+        'fit_model': None,
     }
 
     if search_cv_type == 'GridSearchCV':
@@ -1510,7 +1523,7 @@ def lasso_regression(train_test=None, alpha=None, cv_number=None, cv_measurement
         alpha_buffer = alpha
         model_for_analysis = model_lasso
     
-    st.session_state.fit_models['lasso'] = [model_for_analysis]
+    regression_ouput['fit_model'] = model_for_analysis
     lass_regr_metric = regression_metrics(regression_name=regression_name, alpha=f'alpha: {alpha_buffer}', y_test=y_test, y_pred=y_pred_lasso)
     regression_ouput['regression_metric'] = lass_regr_metric
 
@@ -1535,7 +1548,8 @@ def ridge_regression(train_test=None, alpha=None, cv_number=None, cv_measurement
     regression_ouput = {
         'regression_metric': None,
         'cv_analysis': None,
-        'FI_analysis': None, 
+        'FI_analysis': None,
+        'fit_model': None,
     }
 
     if search_cv_type == 'GridSearchCV':
@@ -1564,7 +1578,7 @@ def ridge_regression(train_test=None, alpha=None, cv_number=None, cv_measurement
         alpha_buffer = alpha
         model_for_analysis = model_ridge
     
-    st.session_state.fit_models['ridge'] = [model_for_analysis]
+    regression_ouput['fit_model'] = model_for_analysis
     ridge_regr_metric = regression_metrics(regression_name=regression_name, alpha=f'alpha: {alpha_buffer}', y_test=y_test, y_pred=y_pred_ridge)
     regression_ouput['regression_metric'] = ridge_regr_metric
 
@@ -1629,6 +1643,7 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
     feature_importance = False
     CV_samples = None
     CV_checkbox = False
+    CV_measurement = None
     if analyze_models_toggle:
         feature_importance = st.checkbox(label='Feature Importance (FI) analysis', help=f'''
                                          **Feature Importance:** \n
@@ -1652,6 +1667,7 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
             else:
                 cv_measurement_list = ['accuracy', 'f1']
             CV_measurement = cols[1].selectbox('Select the measurement of CV', cv_measurement_list)
+    
 
 
     st.write('###')
@@ -1711,6 +1727,9 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
                 regression_cv_analysis.append(lin_regr_output['cv_analysis'])
             if lin_regr_output['FI_analysis'] != None:
                 regression_FI_analysis.append(lin_regr_output['FI_analysis'])
+            st.session_state.fit_models['linear'] = [lin_regr_output['fit_model']]
+        else:
+            st.session_state.fit_models['linear'] = None
         if polynomial_regress_toggle:
             pol_regr_output = polynomial_regression(train_test=train_test_data, degree=pol_regr_degree, cv_number=CV_samples, cv_measurement=CV_measurement, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
             regression_metrics.append(pol_regr_output['regression_metric'])
@@ -1718,6 +1737,9 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
                 regression_cv_analysis.append(pol_regr_output['cv_analysis'])
             if pol_regr_output['FI_analysis'] != None:
                 regression_FI_analysis.append(pol_regr_output['FI_analysis'])
+            st.session_state.fit_models['polynomial'] = pol_regr_output['fit_model']
+        else:
+            st.session_state.fit_models['polynomial'] = None
         if lasso_regress_toggle:
             lass_regr_output = lasso_regression(train_test=train_test_data, alpha=lasso_regr_alpha, cv_number=CV_samples, cv_measurement=CV_measurement, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
             regression_metrics.append(lass_regr_output['regression_metric'])
@@ -1725,6 +1747,9 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
                 regression_cv_analysis.append(lass_regr_output['cv_analysis'])
             if lass_regr_output['FI_analysis'] != None:
                 regression_FI_analysis.append(lass_regr_output['FI_analysis'])
+            st.session_state.fit_models['lasso'] = [lass_regr_output['fit_model']]
+        else:
+            st.session_state.fit_models['lasso'] = None
         if ridge_regress_toggle:
             ridge_regr_output = ridge_regression(train_test=train_test_data, alpha=ridge_regr_alpha, cv_number=CV_samples, cv_measurement=CV_measurement, feature_importance=feature_importance, search_cv_type=search_cv_type, n_iter_number=n_iter_number)
             regression_metrics.append(ridge_regr_output['regression_metric'])
@@ -1732,6 +1757,9 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
                 regression_cv_analysis.append(ridge_regr_output['cv_analysis'])
             if ridge_regr_output['FI_analysis'] != None:
                 regression_FI_analysis.append(ridge_regr_output['FI_analysis'])
+            st.session_state.fit_models['ridge'] = [ridge_regr_output['fit_model']]
+        else:
+            st.session_state.fit_models['ridge'] = None
 
         if regression_metrics:
             metrics_results = pd.DataFrame(regression_metrics).set_index('Regression model').T
