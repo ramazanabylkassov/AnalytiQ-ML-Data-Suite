@@ -86,9 +86,10 @@ def main():
                 hue = cols_pp[1].selectbox('Choose feature to highlight (hue)', hue_cat_list, index=None)
                 plot_pairplot(df=df_analyze, hue=hue)
 
-        if (panda_profile_toggle or outlier_analysis_toggle) and data_analysis_form_button:
-            if panda_profile_toggle:
-                panda_profile_main_page(df=df_analyze, settings=panda_profile_settings)
+        # if (panda_profile_toggle or outlier_analysis_toggle) and data_analysis_form_button:
+        if outlier_analysis_toggle and data_analysis_form_button:
+            # if panda_profile_toggle:
+            #     panda_profile_main_page(df=df_analyze, settings=panda_profile_settings)
             if outlier_analysis_toggle:
                 outliers_analysis_main_page(df=df_outliers, settings=outliers_analysis_settings, dataframe_name=dataframe_name)
 
