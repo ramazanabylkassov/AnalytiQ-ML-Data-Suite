@@ -37,17 +37,6 @@ Welcome to the Data Analysis and Machine Learning Toolkit! This program is desig
 - Numeric target feature: [Price of flats in Moscow Dataset](https://www.kaggle.com/datasets/hugoncosta/price-of-flats-in-moscow/data)
 - Categorical target feature: [Titanic dataset](https://www.kaggle.com/competitions/titanic)
 
-## Contributors
-**Ramazan Abylkassov, MD**
-- [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/)
-- [GitHub repository](https://github.com/ramazanabylkassov/Data-Analysis-and-Machine-Learning-Toolkit)
-
-## Support
-
-If you have any questions, encounter issues, or want to contribute to the toolkit, please contact - ramazan.abylkassov@gmail.com
-
-Happy data analysis and machine learning!
-
 # Run the App
 
 To run locally, clone the repository, go to the diretory and install the requirements.
@@ -61,3 +50,14 @@ Now, go to the src directory and run:
 ```
 streamlit run _1_Homepage.py
 ```
+
+## Contributors
+**Ramazan Abylkassov, MD**
+- [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/)
+- [GitHub repository](https://github.com/ramazanabylkassov/Data-Analysis-and-Machine-Learning-Toolkit)
+
+## Support
+
+If you have any questions, encounter issues, or want to contribute to the toolkit, please contact - ramazan.abylkassov@gmail.com
+
+Happy data analysis and machine learning!
