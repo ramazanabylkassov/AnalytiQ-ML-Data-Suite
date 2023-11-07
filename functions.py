@@ -1428,7 +1428,7 @@ def polynomial_regression(train_test=None, degree=None, cv_number=None, cv_measu
             'poly__degree': [1, 2, 3, 4, 5],
         }
 
-        grid_cv_polynom = GridSearchCV(pipeline, param_grid, cv=5, n_jobs=-1, scoring='neg_mean_squared_error')
+        grid_cv_polynom = GridSearchCV(pipeline, param_grid, cv=5, scoring='neg_mean_squared_error')
         grid_cv_polynom.fit(X_train, y_train)
         degree_buffer = grid_cv_polynom.best_params_['poly__degree']
         best_estimator = grid_cv_polynom.best_estimator_
@@ -1447,7 +1447,7 @@ def polynomial_regression(train_test=None, degree=None, cv_number=None, cv_measu
             'poly__degree': randint(1, 6)
         }
         
-        random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, n_jobs=-1, verbose=2, random_state=42, scoring='neg_mean_squared_error')
+        random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, verbose=2, random_state=42, scoring='neg_mean_squared_error')
         random_search.fit(X_train, y_train)
         
         degree_buffer = random_search.best_params_['poly__degree']
