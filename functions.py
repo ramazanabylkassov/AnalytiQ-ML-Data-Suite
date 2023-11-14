@@ -23,7 +23,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import RandomizedSearchCV
+# from sklearn.model_selection import RandomizedSearchCV
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix
@@ -1443,26 +1443,26 @@ def polynomial_regression(train_test=None, degree=None, cv_number=None, cv_measu
         pipeline_poly = best_estimator.named_steps['poly']
         X_train_poly = pipeline_poly.transform(X_train)
         feature_names = pipeline_poly.get_feature_names_out(input_features=X_train.columns)
-    elif search_cv_type == 'RandomizedSearchCV':
-        model = Pipeline([
-            ('poly', PolynomialFeatures(degree=2)),
-            ('regressor', LinearRegression())
-        ])
-        param_dist = {
-            'poly__degree': randint(1, 6)
-        }
+    # elif search_cv_type == 'RandomizedSearchCV':
+    #     model = Pipeline([
+    #         ('poly', PolynomialFeatures(degree=2)),
+    #         ('regressor', LinearRegression())
+    #     ])
+    #     param_dist = {
+    #         'poly__degree': randint(1, 6)
+    #     }
         
-        random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, n_jobs=-1, verbose=2, random_state=42, scoring='neg_mean_squared_error')
-        random_search.fit(X_train, y_train)
+    #     random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, verbose=2, random_state=42, scoring='neg_mean_squared_error')
+    #     random_search.fit(X_train, y_train)
         
-        degree_buffer = random_search.best_params_['poly__degree']
-        best_estimator = random_search.best_estimator_
-        y_pred_polynom = best_estimator.predict(X_test)
-        model_for_analysis = best_estimator.named_steps['regressor']
+    #     degree_buffer = random_search.best_params_['poly__degree']
+    #     best_estimator = random_search.best_estimator_
+    #     y_pred_polynom = best_estimator.predict(X_test)
+    #     model_for_analysis = best_estimator.named_steps['regressor']
         
-        pipeline_poly = best_estimator.named_steps['poly']
-        X_train_poly = pipeline_poly.transform(X_train)
-        feature_names = pipeline_poly.get_feature_names_out(input_features=X_train.columns)
+    #     pipeline_poly = best_estimator.named_steps['poly']
+    #     X_train_poly = pipeline_poly.transform(X_train)
+    #     feature_names = pipeline_poly.get_feature_names_out(input_features=X_train.columns)
     else:
         poly = PolynomialFeatures(degree=degree)
         X_train_poly = poly.fit_transform(X_train)
@@ -1510,17 +1510,17 @@ def lasso_regression(train_test=None, alpha=None, cv_number=None, cv_measurement
         y_pred_lasso = grid_cv_lasso.predict(X_test)
         alpha_buffer = grid_cv_lasso.best_params_["alpha"]
         model_for_analysis = grid_cv_lasso.best_estimator_
-    elif search_cv_type == 'RandomizedSearchCV':
-        model = Lasso()
-        param_dist = {
-            'alpha': uniform(loc=0.0, scale=1.0),
-        }
-        random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, n_jobs=-1, verbose=2, random_state=42, scoring='neg_mean_squared_error')
-        random_search.fit(X_train, y_train)
+    # elif search_cv_type == 'RandomizedSearchCV':
+    #     model = Lasso()
+    #     param_dist = {
+    #         'alpha': uniform(loc=0.0, scale=1.0),
+    #     }
+    #     random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, verbose=2, random_state=42, scoring='neg_mean_squared_error')
+    #     random_search.fit(X_train, y_train)
 
-        y_pred_lasso = random_search.predict(X_test)
-        alpha_buffer = random_search.best_params_["alpha"]
-        model_for_analysis = random_search.best_estimator_
+    #     y_pred_lasso = random_search.predict(X_test)
+    #     alpha_buffer = random_search.best_params_["alpha"]
+    #     model_for_analysis = random_search.best_estimator_
     else:
         model_lasso = Lasso(alpha=alpha) 
         model_lasso.fit(X_train, y_train)
@@ -1565,17 +1565,17 @@ def ridge_regression(train_test=None, alpha=None, cv_number=None, cv_measurement
         y_pred_ridge = grid_cv_ridge.predict(X_test)
         alpha_buffer = grid_cv_ridge.best_params_["alpha"]
         model_for_analysis = grid_cv_ridge.best_estimator_
-    elif search_cv_type == 'RandomizedSearchCV':
-        model = Ridge()
-        param_dist = {
-            'alpha': uniform(loc=0.0, scale=1.0),
-        }
-        random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, n_jobs=-1, verbose=2, random_state=42, scoring='neg_mean_squared_error')
-        random_search.fit(X_train, y_train)
+    # elif search_cv_type == 'RandomizedSearchCV':
+    #     model = Ridge()
+    #     param_dist = {
+    #         'alpha': uniform(loc=0.0, scale=1.0),
+    #     }
+    #     random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, verbose=2, random_state=42, scoring='neg_mean_squared_error')
+    #     random_search.fit(X_train, y_train)
 
-        y_pred_ridge = random_search.predict(X_test)
-        alpha_buffer = random_search.best_params_["alpha"]
-        model_for_analysis = random_search.best_estimator_
+    #     y_pred_ridge = random_search.predict(X_test)
+    #     alpha_buffer = random_search.best_params_["alpha"]
+    #     model_for_analysis = random_search.best_estimator_
     else:
         model_ridge = Ridge(alpha=alpha)
         model_ridge.fit(X_train, y_train)
@@ -1868,10 +1868,11 @@ def grid_search_cv():
                                         ''')
     n_iter_number = None
     search_cv_type = None
-    if apply_gridsearch_toggle:
-        search_cv_type = st.radio('Choose type of SearchCV', ['GridSearchCV', 'RandomizedSearchCV'], horizontal=True)
-        if search_cv_type == 'RandomizedSearchCV':
-            n_iter_number = st.number_input('Input the number of iterations', value=3, min_value=1)
+    search_cv_type = 'GridSearchCV'
+    # if apply_gridsearch_toggle:
+    #     search_cv_type = st.radio('Choose type of SearchCV', ['GridSearchCV', 'RandomizedSearchCV'], horizontal=True)
+    #     if search_cv_type == 'RandomizedSearchCV':
+    #         n_iter_number = st.number_input('Input the number of iterations', value=3, min_value=1)
     return apply_gridsearch_toggle, n_iter_number, search_cv_type
 
 def ML_classification_models(train_test_data=None, container_metrics=None):

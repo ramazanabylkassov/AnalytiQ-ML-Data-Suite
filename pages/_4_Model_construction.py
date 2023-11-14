@@ -27,9 +27,6 @@ def main():
         st.markdown(f"<h1 style='text-align: center'>{st.session_state.dataframe['df_name'].title()}</h1>", unsafe_allow_html=True)
         st.write('---')
 
-        with st.expander('session state'):
-            st.write(st.session_state)
-
         st.markdown(f"<h1 style='text-align: center'>Model construction</h1>", unsafe_allow_html=True)
         st.write('---')
         dataframe_exploration(tabs_names=['Processed dataframe', 'Statistical info'], dataframes_dict={'Processed dataframe': processed_df})
