@@ -26,7 +26,12 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report,confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import precision_score, recall_score
+from sklearn.metrics import ConfusionMatrixDisplay
+from sklearn.neighbors import KNeighborsClassifier
+# plot_roc_curve, plot_precision_recall_curve
+
 from sklearn.svm import SVC
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import LogisticRegression
@@ -40,6 +45,7 @@ import requests
 from streamlit_lottie import st_lottie
 import random
 import plotly.express as px
+
 
 # import sketch
 
@@ -918,7 +924,6 @@ def correlation_heatmap(df=None):
     fig = plt.figure(figsize=(15, 5))
     sns.heatmap(df.corr(), annot=True, cmap='coolwarm')
     st.pyplot(fig)
-    
 
 # def panda_profile_sidebar():
 #     st.markdown(f"<h3 style='text-align: center'>Analyze your data with Pandas Profiling</h3>", unsafe_allow_html=True)
@@ -1368,7 +1373,7 @@ def train_test(df=None, target_feature=None):
     cols[0].write('Train size (%)')
     cols[0].number_input('Train size (%)', max_value=99, min_value=1, key='test_size', value=70, on_change=num_input_train_size, label_visibility='collapsed')
     cols[1].write('Test size (%)')
-    test_size = cols[1].number_input('Test size (%)', max_value=99, min_value=1, key='train_size', value=30, on_change=num_input_test_size, label_visibility='collapsed')
+    test_size = cols[1].number_input('Test size (%)', max_value=99, min_value=1, key='train_size', value=30, on_change=num_input_test_size, label_visibility='collapsed')/100
     return train_test_split(df.drop(target_feature,axis=1), df[target_feature], test_size=test_size, random_state=32)
 
 @st.cache_resource
@@ -1447,7 +1452,7 @@ def polynomial_regression(train_test=None, degree=None, cv_number=None, cv_measu
             'poly__degree': randint(1, 6)
         }
         
-        random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, verbose=2, random_state=42, scoring='neg_mean_squared_error')
+        random_search = RandomizedSearchCV(model, param_distributions=param_dist, n_iter=n_iter_number, cv=5, n_jobs=-1, verbose=2, random_state=42, scoring='neg_mean_squared_error')
         random_search.fit(X_train, y_train)
         
         degree_buffer = random_search.best_params_['poly__degree']
@@ -1630,15 +1635,9 @@ def ML_analysis_cross_validation(model_name=None, model=None, X_train=None, y_tr
 def ML_regression_models(train_test_data=None, container_metrics=None, container_cv_analysis=None, container_FI_analysis=None):
     st.markdown(f"<h2 style='text-align: center'>Regression ML models</h2>", unsafe_allow_html=True)
     st.write('###')
-    apply_gridsearch_toggle = st.toggle('Apply GridSearchCV', value=True, help=f'''
-                                        Systematic approach to find the best combination of hyperparameters for a model by performing an exhaustive search over a predefined hyperparameter grid. \n
-                                        [Learn more >](https://scikit-learn.org/stable/modules/grid_search.html#grid-search)
-                                        ''')
-    n_iter_number = None
-    if apply_gridsearch_toggle:
-        search_cv_type = st.radio('Choose type of SearchCV', ['GridSearchCV', 'RandomizedSearchCV'], horizontal=True)
-        if search_cv_type == 'RandomizedSearchCV':
-            n_iter_number = st.number_input('Input the number of iterations', value=3, min_value=1)
+
+    apply_gridsearch_toggle, n_iter_number, search_cv_type = grid_search_cv()
+
     analyze_models_toggle = st.toggle(label="Model analysis", value=False)
     feature_importance = False
     CV_samples = None
@@ -1668,8 +1667,6 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
                 cv_measurement_list = ['accuracy', 'f1']
             CV_measurement = cols[1].selectbox('Select the measurement of CV', cv_measurement_list)
     
-
-
     st.write('###')
     with st.form('Regression models'):
         cols = st.columns(2)
@@ -1773,7 +1770,6 @@ def ML_regression_models(train_test_data=None, container_metrics=None, container
             container_cv_analysis.write(f"<h3 style='text-align: center'>ML model: CrossValidation analysis</h3>", unsafe_allow_html=True)
             container_cv_analysis.dataframe(cv_analysis_results, use_container_width=True)
         
-        
         if regression_FI_analysis:
             container_FI_analysis.write(f"<h3 style='text-align: center'>ML model: Feature Importance analysis</h3>", unsafe_allow_html=True)
             for result in regression_FI_analysis:
@@ -1862,10 +1858,300 @@ def readme():
                 - [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/)
                 - [GitHub repository](https://github.com/ramazanabylkassov/Data-Analysis-and-Machine-Learning-Toolkit)
 
-                ## Support
-
-                If you have any questions, encounter issues, or want to contribute to the toolkit, please contact - ramazan.abylkassov@gmail.com
-
-                Happy data analysis and machine learning!
+                **Happy data analysis and machine learning!**
              ''')
+
+def grid_search_cv():
+    apply_gridsearch_toggle = st.toggle('Apply GridSearchCV', value=True, help=f'''
+                                        Systematic approach to find the best combination of hyperparameters for a model by performing an exhaustive search over a predefined hyperparameter grid. \n
+                                        [Learn more >](https://scikit-learn.org/stable/modules/grid_search.html#grid-search)
+                                        ''')
+    n_iter_number = None
+    search_cv_type = None
+    if apply_gridsearch_toggle:
+        search_cv_type = st.radio('Choose type of SearchCV', ['GridSearchCV', 'RandomizedSearchCV'], horizontal=True)
+        if search_cv_type == 'RandomizedSearchCV':
+            n_iter_number = st.number_input('Input the number of iterations', value=3, min_value=1)
+    return apply_gridsearch_toggle, n_iter_number, search_cv_type
+
+def ML_classification_models(train_test_data=None, container_metrics=None):
+    st.markdown(f"<h2 style='text-align: center'>Classification ML models</h2>", unsafe_allow_html=True)
+    st.write('###')
+    apply_gridsearch_toggle, n_iter_number, search_cv_type = grid_search_cv()
+    KNN_hyperparameters, SVC_hyperparameters, log_hyperparameters, RF_hyperparameters, decision_tree_hyperparameters = None, None, None, None, None
+    with st.form('classification_models'):
+        KNN_switch = st.toggle(label="K-NN classification", help='''
+                               ***Nearest Neighbors Classification (KNN)*** \n
+                               **Type**: Instance-based, lazy learning algorithm.  
+                               **Flexibility**: Versatile, can handle both classification and regression tasks.  
+                               **Decision Making**: Makes predictions based on the majority class or average of the k-nearest neighbors.  
+                               **Hyperparameters**: Key hyperparameter is the number of neighbors (k).  
+                               **Distance Metric**: Utilizes a distance metric (e.g., Euclidean, Manhattan) to measure similarity.  
+                               **Pros**: Simple, easy to understand, no assumptions about data distribution.  
+                               **Cons**: Computationally expensive, sensitive to irrelevant features and outliers. \n
+                               [Learn more >](https://scikit-learn.org/stable/modules/neighbors.html#nearest-neighbors-classification)
+                               ''')
+        if not search_cv_type:
+            KNN_hyperparameters = hyperparameters(model='KNN')
+        SVC_switch = st.toggle(label="SVM classification", help='''
+                               ***Support Vector Machine (SVM) Classification*** \n
+                               **Type**: Versatile algorithm for classification and regression tasks.  
+                               **Flexibility**: Can handle linear and non-linear relationships through the use of kernel functions.  
+                               **Decision Making**: Finds a hyperplane that best separates classes in feature space.  
+                               **Hyperparameters**: C (regularization parameter), kernel type, kernel parameters.  
+                               **Interpretability**: Less interpretable than logistic regression due to transformations in higher-dimensional space.  
+                               **Pros**: Effective in high-dimensional spaces, versatile, can handle non-linear data.  
+                               **Cons**: Computationally intensive, sensitive to noisy data. \n
+                               [Learn more >](https://scikit-learn.org/stable/modules/svm.html#svm-classification)
+                               ''')
+        if not search_cv_type:
+            SVC_hyperparameters = hyperparameters(model='SVC')
+        logistic_regr_switch = st.toggle(label="Logistic regression", help='''
+                                         ***Logistic Regression*** \n                                
+                                         **Type**: Linear model for binary and multiclass classification.  
+                                         **Flexibility**: Assumes a linear relationship between features and log-odds of the target.  
+                                         **Decision Making**: Computes probabilities using the logistic function, then applies a threshold.  
+                                         **Hyperparameters**: Regularization parameter (C), penalty type (L1 or L2).  
+                                         **Interpretability**: More interpretable than complex models like SVM.  
+                                         **Pros**: Simple, fast, interpretable, works well for linearly separable data.  
+                                         **Cons**: Limited to linear decision boundaries. \n
+                                         [Learn more >](https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression)
+                                         ''')
+        if not search_cv_type:
+            log_hyperparameters = hyperparameters(model='log')
+        decision_tree_switch = st.toggle(label="Decision Tree Classifier", help='''
+                                         ***Decision Tree Classifier*** \n                                        
+                                         **Type**: Non-linear model used for classification and regression.  
+                                         **Flexibility**: Captures non-linear relationships in data.  
+                                         **Decision Making**: Divides the feature space into regions based on feature thresholds.  
+                                         **Hyperparameters**: Depth of the tree, minimum samples per leaf, criterion (Gini or Entropy).  
+                                         **Interpretability**: Easily interpretable, can be visualized.  
+                                         **Pros**: Simple, non-parametric, handles non-linear relationships.  
+                                         **Cons**: Prone to overfitting, sensitive to noisy data. \n
+                                         [Learn more >](https://scikit-learn.org/stable/modules/tree.html#classification)
+
+''')
+        if not search_cv_type:
+            decision_tree_hyperparameters = hyperparameters(model='decision tree')
+        random_forest_switch = st.toggle(label="Random Tree Classifier", help='''
+                                         ***Random Forest Decision Tree*** \n
+                                         **Type**: Ensemble model composed of multiple decision trees.  
+                                         **Flexibility**: Can capture complex relationships in data.  
+                                         **Decision Making**: Combines predictions from multiple decision trees.  
+                                         **Hyperparameters**: Number of trees, tree hyperparameters (e.g., depth, minimum samples per leaf).  
+                                         **Interpretability**: Less interpretable than individual decision trees.  
+                                         **Pros**: Reduces overfitting, robust, handles non-linear relationships.  
+                                         **Cons**: Complexity, may require more computational resources. \n
+                                         [Learn more >](https://scikit-learn.org/stable/modules/ensemble.html#random-forests-and-other-randomized-tree-ensembles)
+                                         ''')
+        if not search_cv_type:
+            RF_hyperparameters = hyperparameters(model='random forest')
+        class_models_form_button = st.form_submit_button('Build models')
+    
+    if class_models_form_button:
+        with container_metrics:
+            if KNN_switch:
+                st.write(f'<h2 style="text-align: center">Nearest Neighbors Classification (KNN)</h2>', unsafe_allow_html=True)
+                KNN_model = KNN(hyperparameters=KNN_hyperparameters, train_test=train_test_data, grid_search_CV_toggle=apply_gridsearch_toggle)
+                st.session_state.fit_models['KNN'] = [KNN_model]
+            else:
+                st.session_state.fit_models['KNN'] = None
+            if SVC_switch:
+                st.write(f"<h2 style='text-align: center'>Support Vector Machine (SVM)</h2>", unsafe_allow_html=True)
+                SVM_model = SVM_classifier(hyperparameters=SVC_hyperparameters, train_test=train_test_data, grid_search_CV_toggle=apply_gridsearch_toggle)
+                st.session_state.fit_models['SVM'] = [SVM_model]
+            else:
+                st.session_state.fit_models['SVM'] = None
+            if logistic_regr_switch:
+                st.write(f"<h2 style='text-align: center'>Logistic Regression</h2>", unsafe_allow_html=True)
+                log_model = logistic_regression(hyperparameters=log_hyperparameters, train_test=train_test_data, grid_search_CV_toggle=apply_gridsearch_toggle)
+                st.session_state.fit_models['log regression'] = [log_model]
+            else:
+                st.session_state.fit_models['log regression'] = None
+            if decision_tree_switch:
+                st.write(f"<h2 style='text-align: center'>Decision Tree Classifier</h2>", unsafe_allow_html=True)
+                decision_tree_model = decision_tree_classifier(hyperparameters=decision_tree_hyperparameters, train_test=train_test_data, grid_search_CV_toggle=apply_gridsearch_toggle)
+                st.session_state.fit_models['decision tree'] = [decision_tree_model]
+            else:
+                st.session_state.fit_models['decision tree'] = None
+            if random_forest_switch:
+                st.write(f"<h2 style='text-align: center'>Random Forest</h2>", unsafe_allow_html=True)
+                random_forest_model = random_forest(hyperparameters=RF_hyperparameters, train_test=train_test_data, grid_search_CV_toggle=apply_gridsearch_toggle)
+                st.session_state.fit_models['random forest'] = [random_forest_model]
+            else:
+                st.session_state.fit_models['random forest'] = None
+
+            st.write('Here will be classification models results...')
+
+def plot_metrics(y_test=None, y_pred=None, best_params=None):
+    cm = confusion_matrix(y_true=y_test, y_pred=y_pred)
+    cm = pd.DataFrame(cm).rename({0: 'Predicted Negative', 1: 'Predicted Positive'}, axis=1).rename({0: 'Actual Negative', 1: 'Actual Positive'}, axis=0)
+    cols = st.columns(2)
+    cols[0].subheader("Confusion Matrix")
+    cols[1].subheader('Classification Report')
+    cols = st.columns(2)
+    cols[0].dataframe(cm, use_container_width=True)
+    if best_params:
+        with cols[0]:
+            st.subheader("Grid Search results")
+            st.dataframe(pd.DataFrame.from_dict(best_params, orient='index').rename_axis('Hyperparameter').rename({0: 'Best parameter'}, axis=1), use_container_width=True)
+    cols[1].dataframe(pd.DataFrame(classification_report(y_test, y_pred, output_dict=True)).T, use_container_width=True)
+
+@st.cache_resource
+def KNN(hyperparameters=None, train_test=None, grid_search_CV_toggle=False):
+    x_train = train_test['X_train']
+    x_test = train_test['X_test']
+    y_train = train_test['y_train']
+    y_test = train_test['y_test']
+    best_params=None
+    
+    if grid_search_CV_toggle:
+        param_grid = {
+            'n_neighbors': np.arange(2, 100, 1),  # Vary the number of neighbors
+            'weights': ['uniform', 'distance'],  # Consider uniform and distance-based weights
+            'algorithm': ['auto', 'ball_tree', 'kd_tree', 'brute'],  # Different algorithms for neighbor search
+            'p': [1, 2],  # Power parameter for the Minkowski distance (1 for Manhattan, 2 for Euclidean)
+        }
+        model = GridSearchCV(KNeighborsClassifier(),param_grid,refit=True,verbose=3)
+        model.fit(x_train, y_train)
+        best_params = model.best_params_
+    else:
+        model = KNeighborsClassifier(n_neighbors=hyperparameters['n_neighbors'], weights=hyperparameters['weight'], algorithm=hyperparameters['algorithm'], p=hyperparameters['p'])
+        model.fit(x_train, y_train)
+
+    y_pred = model.predict(x_test)
+    plot_metrics(y_test=y_test, y_pred=y_pred, best_params=best_params)
+    return model
+
+@st.cache_resource
+def SVM_classifier(hyperparameters=None, train_test=None, grid_search_CV_toggle=False):
+    x_train = train_test['X_train']
+    x_test = train_test['X_test']
+    y_train = train_test['y_train']
+    y_test = train_test['y_test']
+    best_params=None
+    
+    if grid_search_CV_toggle:
+        param_grid = {'C': [0.1, 1, 10, 100, 1000], 'gamma': ['scale', 'auto'], 'kernel': ['rbf', 'linear']} 
+        model = GridSearchCV(SVC(),param_grid,refit=True,verbose=3)
+        model.fit(x_train, y_train)
+        best_params = model.best_params_
+    else:
+        model = SVC(C=hyperparameters['C'], kernel=hyperparameters['kernel'], gamma=hyperparameters['gamma'])
+        model.fit(x_train, y_train)
+
+    y_pred = model.predict(x_test)
+    plot_metrics(y_test=y_test, y_pred=y_pred, best_params=best_params)
+    return model
+
+@st.cache_resource
+def logistic_regression(hyperparameters=None, train_test=None, grid_search_CV_toggle=None):
+    x_train = train_test['X_train']
+    x_test = train_test['X_test']
+    y_train = train_test['y_train']
+    y_test = train_test['y_test']
+    best_params = None
+
+    if grid_search_CV_toggle:
+        param_grid = {'C': [0.1, 1, 10, 100, 1000], 'max_iter': np.arange(100, 500, 1)} 
+        model = GridSearchCV(LogisticRegression(), param_grid, refit=True, verbose=3)
+        model.fit(x_train, y_train)
+        best_params = model.best_params_
+    else:
+        model = LogisticRegression(C=hyperparameters['C'], max_iter=hyperparameters['max_iter'])
+        model.fit(x_train, y_train)
+    
+    y_pred = model.predict(x_test)
+    plot_metrics(y_test=y_test, y_pred=y_pred, best_params=best_params)
+    return model
+
+@st.cache_resource
+def decision_tree_classifier(hyperparameters=None, train_test=None, grid_search_CV_toggle=None):
+    x_train = train_test['X_train']
+    x_test = train_test['X_test']
+    y_train = train_test['y_train']
+    y_test = train_test['y_test']
+    best_params = None
+
+    if grid_search_CV_toggle:
+        param_grid = {
+            'criterion': ['gini', 'entropy'],
+            'splitter': ['best', 'random'],
+            'max_depth': [None, 10, 20, 30, 40, 50],
+            'min_samples_split': [2, 5, 10],
+            'min_samples_leaf': [1, 2, 4],
+            'max_features': [None, 'sqrt', 'log2']
+        }
+        model = GridSearchCV(DecisionTreeClassifier(), param_grid, refit=True, verbose=3)
+        model.fit(x_train, y_train)
+        best_params = model.best_params_
+    else:
+        model = DecisionTreeClassifier(criterion=hyperparameters['criterion'], splitter=hyperparameters['splitter'], max_depth=hyperparameters['max_depth'], min_samples_split=hyperparameters['min_samples_split'], min_samples_leaf=hyperparameters['min_samples_leaf'], max_features=hyperparameters['max_features'])
+        model.fit(x_train, y_train)
+
+    y_pred = model.predict(x_test)
+    plot_metrics(y_test=y_test, y_pred=y_pred, best_params=best_params)
+    return model
+
+@st.cache_resource
+def random_forest(hyperparameters=None, train_test=None, grid_search_CV_toggle=None):    
+    x_train = train_test['X_train']
+    x_test = train_test['X_test']
+    y_train = train_test['y_train']
+    y_test = train_test['y_test']
+    best_params = None
+
+    if grid_search_CV_toggle:
+        param_grid = {'n_estimators': [100, 500, 1000], 'max_depth': np.arange(1, 20, 1), 'bootstrap': [True, False]} 
+        model = GridSearchCV(RandomForestClassifier(), param_grid, refit=True, verbose=3)
+        model.fit(x_train, y_train)
+        best_params = model.best_params_
+    else:
+        model = RandomForestClassifier(n_estimators=hyperparameters['n_estimators'], max_depth=hyperparameters['max_depth'], bootstrap=hyperparameters['bootstrap'])
+        model.fit(x_train, y_train)
+
+    y_pred = model.predict(x_test)
+    plot_metrics(y_test=y_test, y_pred=y_pred, best_params=best_params)
+    return model
+
+def hyperparameters(model=None):
+    output = {}
+    if model == 'SVC':
+        cols = st.columns(2)
+        output['C'] = cols[0].number_input("C", 0.01, 10.0, step=0.01, key="SVC_C")
+        output['kernel'] = cols[1].radio("Kernel", ("rbf", "linear"), key="SVC_kernel") 
+        output['gamma'] = st.radio("Gamma", ("scale", "auto"), key="SVC_gamma", horizontal=True)
+        st.write('---')
+    elif model == 'log':
+        cols = st.columns(2)
+        output['C'] = cols[0].number_input("C (Regularization parameter)", 0.01, 10.0, step=0.01, key="log_regr_C")
+        output['max_iter'] = cols[1].slider("Maximum iterations", 100, 500, key="log_regr_max_iter")
+        st.write('---')
+    elif model == 'random forest':
+        cols = st.columns(2)
+        output['n_estimators']= cols[0].number_input("The number of trees in the forest", 100, 5000, step=10, key="RF_n_estimators")
+        output['max_depth'] = cols[1].number_input("The maximum depth of tree", 1, 20, step =1, key="RF_max_depth")
+        output['bootstrap'] = st.radio("Bootstrap samples when building trees", (True, False), key="RF_bootstrap", horizontal=True)
+        st.write('---')
+    elif model == 'KNN':
+        cols = st.columns(2)
+        output['n_neighbors'] = cols[0].number_input('Neighbors', min_value=1, step=1, key='KNN neighbors')
+        output['weight'] = cols[1].radio('Weights', ['uniform', 'distance'], key='KNN weights')
+        cols = st.columns(2)
+        output['algorithm'] = cols[0].selectbox('Neighbor search algorithm', ['auto', 'ball_tree', 'kd_tree', 'brute'], key='KNN algorithm')
+        output['p'] = cols[1].radio('Power', [1, 2], key='KNN power')
+        st.write('---')
+    elif model == 'decision tree':
+        cols = st.columns(2)
+        output['criterion'] = cols[0].radio('Criterion', ['gini', 'entropy'], key='decision_criterion')
+        output['splitter'] = cols[1].radio('splitter', ['best', 'random'], key='decision_splitter')
+        cols = st.columns(2)
+        output['max_depth'] = cols[0].slider('max depth', min_value=0, max_value=50, step=1, key='decision_max_depth')
+        output['min_samples_split'] = cols[1].slider('min samples split', min_value=2, max_value=10, step=1, key='decision_min_samples_split')
+        cols = st.columns(2)
+        output['min_samples_leaf'] = cols[0].slider('min samples leaf', min_value=1, max_value=10, step=1, key='decision_min_samples_leaf')
+        output['max_features'] = cols[1].radio('max features', (None, 'sqrt', 'log2'), key='decision_max_features')
+        st.write('---')
+    
+    return output
 

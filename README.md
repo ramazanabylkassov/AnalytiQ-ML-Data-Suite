@@ -56,8 +56,4 @@ streamlit run _1_Homepage.py
 - [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/)
 - [GitHub repository](https://github.com/ramazanabylkassov/Data-Analysis-and-Machine-Learning-Toolkit)
 
-## Support
-
-If you have any questions, encounter issues, or want to contribute to the toolkit, please contact - ramazan.abylkassov@gmail.com
-
-Happy data analysis and machine learning!
+**Happy data analysis and machine learning!**

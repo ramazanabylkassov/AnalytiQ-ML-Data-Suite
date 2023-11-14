@@ -4,7 +4,7 @@ st.set_page_config(layout="wide", page_title='Model construction', page_icon='ðŸ
 
 import sys
 sys.path.append("..")
-from functions import dataframe_exploration, change_page_buttons, train_test, ML_regression_models, st_lottie, data_animation_random
+from functions import dataframe_exploration, change_page_buttons, train_test, ML_regression_models, st_lottie, data_animation_random, ML_classification_models
 
 if 'fit_models' not in st.session_state:
     st.session_state.fit_models = {
@@ -12,6 +12,11 @@ if 'fit_models' not in st.session_state:
         'polynomial': None,
         'lasso': None,
         'ridge': None,
+        'KNN': None,
+        'SVM': None,
+        'log regression': None,
+        'decision tree': None,
+        'random forest': None,
     }
 
 def main():
@@ -45,11 +50,7 @@ def main():
             if st.session_state.homepage_param['target_feature_type'] == 'Numeric':
                 ML_regression_models(train_test_data=train_test_data, container_metrics=container_metrics, container_cv_analysis=container_cv_analysis, container_FI_analysis=container_FI_analysis)
             else:
-                KNN_switch = st.toggle(label="K-NN classification")
-                SVC_switch = st.toggle(label="SVC classification")
-                logistic_regr_switch = st.toggle(label="Logistic regression")
-                decision_tree_switch = st.toggle(label="Decision Tree Classifier")
-                random_forest_switch = st.toggle(label="Random Tree Classifier")
+                ML_classification_models(train_test_data=train_test_data, container_metrics=container_metrics)
         
             change_page_buttons(key='bottom', pages=['3 Data processing', '5 Model deployment'])
 

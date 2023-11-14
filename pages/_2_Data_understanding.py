@@ -86,7 +86,9 @@ def main():
             outliers_analysis_main_page(df=df_outliers, settings=outliers_analysis_settings, dataframe_name=dataframe_name)
 
         if scatter_3d_toggle:
+            st.write(f"<h3 style='text-align: center'>3D scatter plot analysis</h3>", unsafe_allow_html=True)
             fig = px.scatter_3d(df_analyze, x=x_feature, y=y_feature, z=z_feature, color=color_feature)
+            fig.update_layout(height=800)
             st.plotly_chart(fig, use_container_width=True)
 
         if heatmap_toggle:
