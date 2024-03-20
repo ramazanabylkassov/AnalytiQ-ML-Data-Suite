@@ -71,7 +71,7 @@ def main():
         # ask_AI(df=df_original)
 
     else:
-        st.markdown(f"<h1 style='text-align: center'>Data Analysis and Machine Learning Toolkit</h1>", unsafe_allow_html=True)
+        st.markdown(f"<h1 style='text-align: center'>AnalytiQ: ML & Data Suite</h1>", unsafe_allow_html=True)
         upload_data()
         readme()
 

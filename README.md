@@ -1,6 +1,6 @@
 ## Introduction
 
-Welcome to the [Data Analysis and Machine Learning Toolkit](https://data-analysis-and-machine-learning-toolkit.streamlit.app/)! This program is designed to simplify the process of working with datasets that have a target feature, whether it's numeric or categorical. With this toolkit, you can perform various data pre-processing tasks, conduct data analysis with visualization, handle outlier analysis, and implement supervised machine learning models for both regression and classification tasks.
+Welcome to the [AnalytiQ: ML & Data Suite](https://data-analysis-and-machine-learning-toolkit.streamlit.app/)! This program is designed to simplify the process of working with datasets that have a target feature, whether it's numeric or categorical. With this toolkit, you can perform various data pre-processing tasks, conduct data analysis with visualization, handle outlier analysis, and implement supervised machine learning models for both regression and classification tasks.
 
 ## Features
 
@@ -54,6 +54,6 @@ streamlit run _1_Homepage.py
 ## Contributors
 **Ramazan Abylkassov, MD**
 - [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/)
-- [GitHub repository](https://github.com/ramazanabylkassov/Data-Analysis-and-Machine-Learning-Toolkit)
+- [GitHub repository](https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite)
 
 **Happy data analysis and machine learning!**
