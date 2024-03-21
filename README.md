@@ -35,7 +35,7 @@ Welcome to the [AnalytiQ: ML & Data Suite](https://analytiq-ml-data-suite.stream
 
 ## Kaggle examples
 - Numeric target feature: [Price of flats in Moscow Dataset](https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite/blob/main/csv_examples/flats_moscow.csv)
-- Categorical target feature: [Titanic train dataset](https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite/blob/main/csv_examples/titanic_train.csv)
+- Categorical target feature: [Titanic train dataset](wget https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite/blob/main/csv_examples/titanic_train.csv)
 
 # Run the App
 
