@@ -1850,13 +1850,13 @@ def readme():
                 - Evaluate model performance using various metrics.
 
                 ## Kaggle examples
-                - Numeric target feature: [Price of flats in Moscow Dataset](https://www.kaggle.com/datasets/hugoncosta/price-of-flats-in-moscow/data)
-                - Categorical target feature: [Titanic dataset](https://www.kaggle.com/competitions/titanic)
+                - Numeric target feature: [Price of flats in Moscow Dataset](https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite/blob/main/csv_examples/flats_moscow.csv)
+                - Categorical target feature: [Titanic train dataset](https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite/blob/main/csv_examples/titanic_train.csv)
 
                 ## Contributors
                 **Ramazan Abylkassov, MD**
                 - [LinkedIn](https://www.linkedin.com/in/ramazan-abylkassov-23965097/)
-                - [GitHub repository](https://github.com/ramazanabylkassov/Data-Analysis-and-Machine-Learning-Toolkit)
+                - [GitHub repository](https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite)
 
                 **Happy data analysis and machine learning!**
              ''')
