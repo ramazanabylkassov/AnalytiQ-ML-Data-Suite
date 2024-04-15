@@ -1,6 +1,6 @@
 ## Introduction
 
-Welcome to the [AnalytiQ: ML & Data Suite](https://analytiq-ml-data-suite.streamlit.app/)! This program is designed to simplify the process of working with datasets that have a target feature, whether it's numeric or categorical. With this toolkit, you can perform various data pre-processing tasks, conduct data analysis with visualization, handle outlier analysis, and implement supervised machine learning models for both regression and classification tasks.
+Welcome to the [AnalytiQ: ML & Data Suite](https://analytiq-ml-data-suite.streamlit.app/) (The web-site may require waking up)! This program is designed to simplify the process of working with datasets that have a target feature, whether it's numeric or categorical. With this toolkit, you can perform various data pre-processing tasks, conduct data analysis with visualization, handle outlier analysis, and implement supervised machine learning models for both regression and classification tasks.
 
 ## Features
 
@@ -11,20 +11,25 @@ Welcome to the [AnalytiQ: ML & Data Suite](https://analytiq-ml-data-suite.stream
 - Utilize one-hot encoding for categorical features without a natural order.
 - Identify and drop duplicate rows, if any, to ensure data integrity.
 - Manually define the feature types, including the target variable, numerical features, and categorical features.
+![Homepage_screenshot](screenshots/AnalitiQ_1_homepage.png)
 
 2. **Data understanding - Data Analysis and Visualization:**
 - Generate descriptive statistics for your dataset.
 - Visualize data distributions, correlations, and more.
 - Explore the relationship between features and the target variable.   
 - Identify and visualize outliers.
+![Data_Understanding_screenshot_1](screenshots/AnalitiQ_2_3D.png)
 
 3. **Data understanding - Outlier Analysis:**
 - Detect and visualize outliers using various methods such as Z-score, IQR, or visualization techniques like scatter plots and box plots.
+![Data_Understanding_screenshot_2](screenshots/AnalitiQ_2_outlier_analysis.png)
+More screenshots [here](screenshots/)
 
 4. **Data Processing:**
 - Choose to treat outliers based on your analysis.
 - Prepare the data for machine learning models.
 - Perform any required normalization or standardization of numerical features.
+![Data_Processing_screenshot](screenshots/AnalitiQ_3_data_processing.png)
 
 5. **Model construction - Supervised Machine Learning:**
 - Split the dataset into training and testing subsets for further analysis and modeling.
@@ -32,6 +37,7 @@ Welcome to the [AnalytiQ: ML & Data Suite](https://analytiq-ml-data-suite.stream
 - Implement classification models for categorical target features.
 - Fine-tune model hyperparameters.
 - Evaluate model performance using various metrics.
+![ML_screenshot](screenshots/AnalitiQ_4_ml_models.png)
 
 ## Kaggle examples
 - Numeric target feature: [Price of flats in Moscow Dataset](https://github.com/ramazanabylkassov/AnalytiQ-ML-Data-Suite/blob/main/csv_examples/flats_moscow.csv)
