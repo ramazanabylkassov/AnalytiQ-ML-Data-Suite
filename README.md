@@ -1,6 +1,7 @@
 ## Introduction
 
-Welcome to the [AnalytiQ: ML & Data Suite](https://analytiq-ml-data-suite.streamlit.app/) (The web-site may require waking up)! This program is designed to simplify the process of working with datasets that have a target feature, whether it's numeric or categorical. With this toolkit, you can perform various data pre-processing tasks, conduct data analysis with visualization, handle outlier analysis, and implement supervised machine learning models for both regression and classification tasks.
+Welcome to the [AnalytiQ: ML & Data Suite](https://analytiq-ml-data-suite.streamlit.app/) (may require waking up)! This program is designed to simplify the process of working with datasets that have a target feature, whether it's numeric or categorical. With this toolkit, you can perform various data pre-processing tasks, conduct data analysis with visualization, handle outlier analysis, and implement supervised machine learning models for both regression and classification tasks.
+![Introduction_page](screenshots/AnalitiQ_0_intro_page.png)
 
 ## Features
 
